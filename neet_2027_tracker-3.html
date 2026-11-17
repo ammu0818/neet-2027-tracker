@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b32">
+<title>NEET 2027 Daily Tracker</title>
+<style>
+:root{color-scheme:light;--green:#176b52;--ink:#18332c;--muted:#64756f;--line:#dce7e1;--bg:#f3f7f4;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+header{background:#123b32;color:white;padding:24px 18px 22px;border-radius:0 0 22px 22px}
+header h1{font-size:24px;margin:6px 0}header p{margin:0;color:#d5e9df;font-size:14px}
+main{max-width:720px;margin:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:0 0 14px;box-shadow:0 2px 8px #153b3210}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#edf5f0;border-radius:12px;padding:12px}.stat strong{display:block;font-size:25px;color:var(--green)}
+h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}
+.progress{height:10px;background:#e7eee9;border-radius:20px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:#26936c;transition:width .2s}
+.task{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #edf1ee}.task:last-child{border:0}.task input{width:20px;height:20px;accent-color:var(--green);margin:2px 0 0}.task label{flex:1}.task small{display:block;color:var(--muted);font-size:12px}.task.done label{text-decoration:line-through;color:#75847e}
+input,textarea,select{font:inherit;width:100%;padding:11px;border:1px solid #cbd9d1;border-radius:10px;background:white;color:var(--ink);margin:5px 0 10px}
+button{font:inherit;border:0;border-radius:10px;padding:11px 14px;background:var(--green);color:white;font-weight:600;cursor:pointer}
+button.secondary{background:#eaf2ed;color:var(--green)}.buttons{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:12px;color:var(--muted)}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 28px}
+@media(min-width:600px){header{padding-left:max(18px,calc((100% - 684px)/2));padding-right:max(18px,calc((100% - 684px)/2))}}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:12px;letter-spacing:.08em;font-weight:700">YOUR STUDY COMPANION</div>
+  <h1>NEET 2027 Daily Tracker</h1>
+  <p>Daily plan · 9:00 AM–9:00 PM · Target: 2 May 2027</p>
+</header>
+<main>
+  <section class="card">
+    <div class="stats">
+      <div class="stat"><strong id="hoursDone">0</strong><span>planned hours checked</span></div>
+      <div class="stat"><strong id="percent">0%</strong><span>today's progress</span></div>
+      <div class="stat"><strong id="daysLeft">—</strong><span>days until 2 May 2027</span></div>
+      <div class="stat"><strong id="streak">0</strong><span>completed study days</span></div>
+    </div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <p class="note" id="todayLabel"></p>
+  </section>
+
+  <section class="card">
+    <h2>Today's study timetable</h2>
+    <div id="tasks"></div>
+    <p class="note">Tick a session when you finish it. Your progress is saved on this device in this browser.</p>
+  </section>
+
+  <section class="card">
+    <h2>Daily chapter log</h2>
+    <label for="chapter">Chapter(s) studied</label>
+    <textarea id="chapter" rows="2" placeholder="Example: Motion in a Plane; Biological Classification"></textarea>
+    <div class="row">
+      <div><label for="actualHours">Actual study hours</label><input id="actualHours" type="number" min="0" max="24" step=".5" placeholder="e.g. 8.5"></div>
+      <div><label for="testScore">Test score / 720</label><input id="testScore" type="number" min="0" max="720" placeholder="Optional"></div>
+    </div>
+    <label for="reflection">What should I revise tomorrow?</label>
+    <textarea id="reflection" rows="2" placeholder="Write weak topics or questions to revisit"></textarea>
+    <div class="buttons"><button id="saveLog">Save today's log</button><button class="secondary" id="export">Export my data</button></div>
+    <p class="note" id="saveStatus" aria-live="polite"></p>
+  </section>
+
+  <section class="card">
+    <h2>Weekly review</h2>
+    <p>At the end of each week, record your test score and the topics you need to revisit.</p>
+    <label for="weeklyScore">Weekly test score / 720</label><input id="weeklyScore" type="number" min="0" max="720" placeholder="Enter score">
+    <label for="weeklyNotes">Weekly reflection</label><textarea id="weeklyNotes" rows="2" placeholder="Strong chapters, weak chapters, next week's priorities"></textarea>
+    <button id="saveWeekly">Save weekly review</button>
+    <p class="note" id="weeklyStatus" aria-live="polite"></p>
+  </section>
+
+  <section class="card">
+    <h2>Reset / data</h2>
+    <p class="note">Your entries stay in this browser on this device. Export a backup regularly, especially before clearing browser data or changing phones.</p>
+    <div class="buttons"><button class="secondary" id="resetDay">Reset today's checkboxes</button><button class="secondary" id="resetAll">Clear all tracker data</button></div>
+  </section>
+  <footer>Be consistent, take breaks, eat regularly and get enough sleep. A missed session is a chance to adjust, not a reason to give up.</footer>
+</main>
+<script>
+const schedule=[
+ ["9:00–11:00 AM","Physics concepts and lecture",2],
+ ["11:15 AM–12:45 PM","Physics numericals and MCQs",1.5],
+ ["12:45–1:30 PM","Chemistry concepts",.75],
+ ["2:15–4:15 PM","Chemistry lecture and practice",2],
+ ["4:30–6:30 PM","Biology NCERT and concepts",2],
+ ["7:00–8:00 PM","Biology MCQs and diagrams",1],
+ ["8:00–9:00 PM","Revision, PYQs and error notebook",1]
+];
+const KEY="neet2027_tracker_v1";
+const today=()=>new Date().toLocaleDateString("en-CA");
+const dateKey=today();
+let data={};try{data=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){data={}}
+data.days=data.days||{};data.weeks=data.weeks||{};
+const day=()=>data.days[dateKey]||(data.days[dateKey]={checks:[],chapter:"",hours:"",score:"",reflection:""});
+const $=id=>document.getElementById(id);
+$("todayLabel").textContent="Today: "+new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+const target=new Date(2027,4,2);const now=new Date();now.setHours(0,0,0,0);
+$("daysLeft").textContent=Math.max(0,Math.ceil((target-now)/86400000));
+function persist(){localStorage.setItem(KEY,JSON.stringify(data))}
+function render(){
+ const d=day(), host=$("tasks");host.innerHTML="";
+ schedule.forEach((s,i)=>{
+  const row=document.createElement("div");row.className="task"+(d.checks.includes(i)?" done":"");
+  const cb=document.createElement("input");cb.type="checkbox";cb.checked=d.checks.includes(i);cb.id="task"+i;
+  cb.addEventListener("change",()=>{const x=day();x.checks=cb.checked?[...new Set([...x.checks,i])]:x.checks.filter(n=>n!==i);persist();render()});
+  const label=document.createElement("label");label.htmlFor=cb.id;label.textContent=s[1];
+  const small=document.createElement("small");small.textContent=s[0]+" · "+s[2]+" "+(s[2]===1?"hour":"hours");label.appendChild(small);
+  row.append(cb,label);host.appendChild(row);
+ });
+ const done=d.checks.reduce((sum,i)=>sum+schedule[i][2],0);
+ $("hoursDone").textContent=done.toFixed(done%1?1:0)+" / 10";
+ $("percent").textContent=Math.round(done/10*100)+"%";$("bar").style.width=Math.min(100,done/10*100)+"%";
+ $("chapter").value=d.chapter;$("actualHours").value=d.hours;$("testScore").value=d.score;$("reflection").value=d.reflection;
+ const completedDays=Object.values(data.days).filter(x=>x.checks&&x.checks.length===schedule.length).length;
+ $("streak").textContent=completedDays;
+}
+$("saveLog").onclick=()=>{const d=day();d.chapter=$("chapter").value;d.hours=$("actualHours").value;d.score=$("testScore").value;d.reflection=$("reflection").value;persist();$("saveStatus").textContent="Today's log saved on this device."};
+$("saveWeekly").onclick=()=>{const k=new Date().toISOString().slice(0,10);data.weeks[k]={score:$("weeklyScore").value,notes:$("weeklyNotes").value};persist();$("weeklyStatus").textContent="Weekly review saved."};
+$("export").onclick=()=>{persist();const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="neet-2027-tracker-backup.json";a.click();URL.revokeObjectURL(url)};
+$("resetDay").onclick=()=>{if(confirm("Clear today's checkboxes only? Your chapter log will remain.")){day().checks=[];persist();render()}};
+$("resetAll").onclick=()=>{if(confirm("Delete all saved tracker data on this device? Export a backup first if needed.")){localStorage.removeItem(KEY);data={days:{},weeks:{}};persist();render()}};
+render();
+</script>
+</body></html>
